@@ -1,0 +1,309 @@
+<html>
+<head>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+<script>
+
+class Quiz {
+    
+    /* Requirements
+    ------------------
+    - Use classes.
+    - Give the user 5 questions. 
+    - Each question has one possible answer from a list of answers. 
+    - Assign points to each question and maintain a running total for the quiz.
+    */
+    
+    constructor (questions) { // I think questions will be an array of Question objects...
+        this.questions = questions; // Has all the Question objects in an array.
+        this.title = "Squares Math Quiz";
+        
+        // This only happens once. Draw the Quiz panels with ids. 
+        document.write("<h1>"+ this.title +"</h1>");
+        this.drawEmptyPanels();
+    } // constructor
+    
+    drawEmptyPanels () { 
+        document.write(`
+        
+        <style>
+            
+            body { 
+                background-color:white;
+                font-family: arial;
+                padding:2em;
+            }
+            
+            #question-panel {
+                backgroupd-color: #CCC;
+                margin:2em 1.5em;
+                width:60%;
+                white-space: nowrap;
+                min-width:300px;
+            }
+            
+            #question-text-panel { 
+                font-weight:bold; 
+                border-bottom:2px solid #BBB;
+                padding:2em;
+                background-color:#DEE;
+                border-radius:1em;
+                margin:.5em;
+            }
+            
+            #question-answers-panel {
+                background-color:#DEE;
+                padding:1.5em 3em;
+                line-height:3em;
+                border-radius:1em;
+                border-bottom:2px solid #BBB;
+                margin:.5em;
+            }
+        
+        </style>
+        
+        <div id="question-panel">
+            <div id="question-text-panel"></div>
+            <div id="question-answers-panel"></div>
+            <div id="question-notice-panel"></div>
+        </div>
+        
+        `);
+        
+    } // drawEmptyPanels
+    
+    drawQuestion (num) {
+        let text = "Question #"+ num;
+        text += "<br /><br />&nbsp;&nbsp;&nbsp;"+ this.questions[num-1].question;
+        document.getElementById("question-text-panel").innerHTML = text;
+    }
+    
+    drawAnswersToQuestion (num) {
+        let text = '';
+        let question = this.questions[num-1]; // This array is zero-based, but this method is not :-/
+        let answerCounter = question.answers.length; // Loop through any number of answers.
+        
+        while (answerCounter--) {
+            text += 'Debugging information... answerCounter: '+ answerCounter +' num: '+ num +' <br />';
+            text += '<input class="quiz-answers" id="'+ answerCounter +'" type="radio" name="'+ num +'">'+ question.getAnswerByNumber(answerCounter).text +"<br />";
+        }
+        
+        /* Capture the click... TODO: rework this code...
+        
+            var elements = document.getElementsByClassName('buttonClassName');
+            for(var i = 0; i < elements.length; i++) {
+                var element = elements[i];
+                element.onclick = function() {}
+            }
+            
+            // Let's improve this... 
+            // https://stackoverflow.com/questions/37468145/javascript-classname-click-without-jquery
+        */    
+
+        document.getElementById("question-answers-panel").innerHTML = ""+ text +"";
+    }
+    
+    listQuestions () { // Just for testing purposes: Draw all the questions...
+        document.write('See if we have the questions in the quiz...<br />');
+        for (var question of this.questions) {
+            document.write(question.question +"<br />");
+        }
+    } // listQuestions
+    
+    listQuestionsWithAnswers () { // Just for testing purposes: Draw all questions with answerse
+        
+        document.write('See if we have the questions and answers in the quiz...<br />');
+        for (var question of this.questions) {
+            document.write(question.question +"<br />");
+            
+            let answerCounter = question.answers.length; // Loop through any number of answers.
+            while (answerCounter--) {
+                document.write(question.getAnswerByNumber(answerCounter).text +"<br />");
+            }
+            
+        }
+    
+    } // listQuestionsWithAnswers
+    
+} // Quiz
+
+class Question {
+
+    constructor (question) { // What are we asking them?
+        this.question = question;
+        this.answers = []; // 2D Array of answers
+    }
+    
+    //--- Multiple ways to add right and wrong answers...
+    
+    addAnswer (text, isRight) { // isRight will be true or false
+        this.answers.push([text, isRight]); // Push the array info that we want into the answers array.
+        this.shuffle(); // Shuffle every time a new answer is added to our array of answers.
+    }
+    
+    addWrongAnswer (answer) {
+        this.answers.push([answer, false]); // Push the array info that we want into the answers array.
+        this.shuffle(); 
+    }
+    
+    addRightAnswer (answer) { 
+        this.answers.push([answer, true]); // Push the array info that we want into the answers array.
+        this.shuffle(); 
+    }
+    
+    addAnswerArray (answerArray) { // This adds a bunch of answers at one time.         
+        for (let answer of answerArray) { 
+            this.answers.push([answer[0], answer[1]]); // Pushes another answer onto the Question's answer array.
+        }
+        this.shuffle();  
+    }
+    
+    getAnswerByNumber (num) { // Get any particular answer... Example: ["Some answer", false] 
+        return {
+            text: this.answers[num][0],
+            isRight: this.answers[num][1]
+        };
+    }
+    
+    shuffle () {
+        function shuffle(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+            return array;
+        }
+        this.answers = shuffle(this.answers);
+    } 
+
+    check (userAnswer) { // Did they get it right?
+        
+        var isRight = false; // First, assume they got it wrong. (Guilty till proven innocent?)
+        for (let answer of this.answers) { 
+            if ( // Two conditions need to be met...
+                (userAnswer == answer[0]) && // User's answer matches one of our answers...
+                (answer[1] == true) // Aaand this particular answer is the right answer. 
+            ) isRight = true; 
+        } // end for loop through all of this Question's answers...
+        
+        return isRight; // Wuz they right?
+    }
+    
+    draw () { // Testing purposes only...
+        document.write("--------------------");
+        document.write("The question is: "+ this.question);
+        document.write("--------------------");
+        // Just test if it works, the Quiz object should draw the questions and answers. 
+        for (let answer of this.answers) {
+            document.write("<br />"+ answer[0] +"<br />");
+        }   
+    }
+    
+} // Question
+
+
+//--- START HERE
+
+var questions = []; // array of Question objects that I'll feed into a Quiz object.
+
+// START QUESTION 1
+questions[0] = new Question("What's 56 squared?"); // Create new Question object from question class
+questions[0].addAnswer("1563", false);
+questions[0].addAnswer("3136", true);
+questions[0].addAnswer("992", false);
+questions[0].addAnswer("6636", false);
+
+// START QUESTION 2
+// Add similar answers, but use different methods. 
+questions[1] = new Question("What's 42 squared?"); // Create new Question object from question class
+questions[1].addWrongAnswer("12324");
+questions[1].addWrongAnswer("321");
+questions[1].addRightAnswer("1764");
+questions[1].addWrongAnswer("848");
+
+// START QUESTION 3
+// Let's construct an array of answers for Question 2, and add them all at once.
+let someAnswers = [
+            [ "224", false ],
+            [ "144", true ],
+            [ "84", false ],
+            [ "350", false ]
+        ];
+questions[2] = new Question("What's 12 squared?"); // Create new Question object from question class
+questions[2].addAnswerArray(someAnswers);
+
+// START QUESTION 4
+someAnswers = [ // Just redefine the array, since we don't need to keep the old array...
+            [ "81", true ],
+            [ "91", false ],
+            [ "121", false ]
+        ];
+        
+questions[3] = new Question("What's 9 squared?"); // Create new Question object from question class
+questions[3].addAnswerArray(someAnswers);
+
+// START QUESTION 5
+someAnswers = [ // Just redefine the array, since we don't need to keep the old array...
+            [ "63", false ],
+            [ "36", true ],
+            [ "99", false ],
+            [ "26", false ],
+            [ "16", false ]
+        ];
+        
+questions[4] = new Question("What's 6 squared?"); // Create new Question object from question class
+questions[4].addAnswerArray(someAnswers);
+
+/* Test retreiving the question and answers for Question 5...  
+document.write('What is question 5? '+ questions[4].question +'<br />'); 
+document.write('Question 5, Answer 1: '+ questions[4].getAnswerByNumber(0).text +'<br />');
+document.write('Question 5, Answer 1: '+ questions[4].getAnswerByNumber(0).isRight +'<br />');
+document.write('Question 5, Answer 2: '+ questions[4].getAnswerByNumber(1).text +'<br />');
+document.write('Question 5, Answer 2: '+ questions[4].getAnswerByNumber(1).isRight +'<br />');
+document.write('Question 5, Answer 3: '+ questions[4].getAnswerByNumber(2).text +'<br />');
+document.write('Question 5, Answer 3: '+ questions[4].getAnswerByNumber(2).isRight +'<br />');
+document.write('Question 5, Answer 4: '+ questions[4].getAnswerByNumber(3).text +'<br />');
+document.write('Question 5, Answer 4: '+ questions[4].getAnswerByNumber(3).isRight +'<br />');
+*/
+
+
+
+/* Let's check if I got the answer right...
+if (questions[4].check("26")) { 
+    document.write("---My answer is right---");
+} else { 
+    document.write("---My answer is wrong---");
+}
+*/
+
+// Test this... getAnswerByNumber (num)
+
+var q = new Quiz(questions);
+q.drawQuestion(1); // Testing
+q.drawAnswersToQuestion(1); // Testing
+
+$(function(){ // Document is ready for jQuery code... 
+    $(".quiz-answers").click(function(){
+        var answerId = $(this).attr('id');
+        var questionId = $(this).attr('name');
+        
+        // questions[questionId].check( ...somehow get the answer in here... );
+        if (questions[questionId].getAnswerByNumber(answerId).isRight)
+            alert('Correct!');
+        else 
+            alert('Incorrect!');
+        
+      alert("You clicked answer..."+ answerId +" on question #"+ questionId);
+    });
+});
+            
+</script>
+</body>
+</html>

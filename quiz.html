@@ -89,21 +89,9 @@ class Quiz {
         let answerCounter = question.answers.length; // Loop through any number of answers.
         
         while (answerCounter--) {
-            text += 'Debugging information... answerCounter: '+ answerCounter +' num: '+ num +' <br />';
+            // text += 'Debugging information... answerCounter: '+ answerCounter +' num: '+ num +' <br />';
             text += '<input class="quiz-answers" id="'+ answerCounter +'" type="radio" name="'+ num +'">'+ question.getAnswerByNumber(answerCounter).text +"<br />";
         }
-        
-        /* Capture the click... TODO: rework this code...
-        
-            var elements = document.getElementsByClassName('buttonClassName');
-            for(var i = 0; i < elements.length; i++) {
-                var element = elements[i];
-                element.onclick = function() {}
-            }
-            
-            // Let's improve this... 
-            // https://stackoverflow.com/questions/37468145/javascript-classname-click-without-jquery
-        */    
 
         document.getElementById("question-answers-panel").innerHTML = ""+ text +"";
     }
@@ -115,7 +103,7 @@ class Quiz {
         }
     } // listQuestions
     
-    listQuestionsWithAnswers () { // Just for testing purposes: Draw all questions with answerse
+    listQuestionsWithAnswers () { // Just for testing purposes: Draw all questions with answers
         
         document.write('See if we have the questions and answers in the quiz...<br />');
         for (var question of this.questions) {
@@ -184,6 +172,8 @@ class Question {
     } 
 
     check (userAnswer) { // Did they get it right?
+    
+        // This method expects the actual answer, rather than the index of the answer array. 
         
         var isRight = false; // First, assume they got it wrong. (Guilty till proven innocent?)
         for (let answer of this.answers) { 
@@ -289,19 +279,22 @@ var q = new Quiz(questions);
 q.drawQuestion(1); // Testing
 q.drawAnswersToQuestion(1); // Testing
 
-$(function(){ // Document is ready for jQuery code... 
-    $(".quiz-answers").click(function(){
-        var answerId = $(this).attr('id');
-        var questionId = $(this).attr('name');
+$(function() { // Document is ready for jQuery code... 
+
+    $(".quiz-answers").click(function() { // This event is triggered when user clicks any answer.
         
-        // questions[questionId].check( ...somehow get the answer in here... );
-        if (questions[questionId].getAnswerByNumber(answerId).isRight)
+        // Grab the attribute, so that we know which answer they clicked on. 
+        var answerId = $(this).attr('id');
+        var questionId = $(this).attr('name') - 1; // The name id isn't zero indexed
+        
+        if (questions[questionId].getAnswerByNumber(answerId).isRight == true)
             alert('Correct!');
         else 
             alert('Incorrect!');
         
-      alert("You clicked answer..."+ answerId +" on question #"+ questionId);
+        // alert("You clicked answer..."+ answerId +" on question #"+ questionId);
     });
+
 });
             
 </script>

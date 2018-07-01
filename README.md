@@ -1,7 +1,7 @@
 # quiz-app
 Single-page OOP quiz app
 
-Lots of ideas for features I could add later, from https://wordpress.org/plugins/quiz-master-next/
+Here's a list of new features ideas from https://wordpress.org/plugins/quiz-master-next/
 
 - Multiple choice (radio buttons), true and false, open answer question, drop down, multiple response (checkboxes), fill in the blank, number, captcha, and accept. More types are being supported in future updates!
 - Multiple Results Pages For Each Quiz
